@@ -13,8 +13,12 @@ import com.youlog.app.data.ImageEntity
 import java.io.File
 
 class MiniViewAdapter(
-    private val onImageClick: (ImageEntity) -> Unit
+    private val onImageClick: (ImageEntity) -> Unit,
+    private val onSelectionChanged: (Boolean) -> Unit
 ) : ListAdapter<ImageEntity, MiniViewAdapter.ImageViewHolder>(ImageDiffCallback()) {
+    
+    private var isSelectionMode = false
+    private val selectedIds = mutableSetOf<Long>()
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -23,24 +27,77 @@ class MiniViewAdapter(
     }
     
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val image = getItem(position)
+        holder.bind(image, isSelectionMode, selectedIds.contains(image.id))
+        
+        holder.itemView.setOnLongClickListener {
+            if (!isSelectionMode) {
+                enterSelectionMode(image.id)
+                true
+            } else false
+        }
+        
+        holder.itemView.setOnClickListener {
+            if (isSelectionMode) {
+                toggleSelection(image.id)
+            } else {
+                onImageClick(image)
+            }
+        }
     }
+    
+    private fun enterSelectionMode(firstImageId: Long) {
+        isSelectionMode = true
+        selectedIds.add(firstImageId)
+        notifyDataSetChanged()
+        onSelectionChanged(true)
+    }
+    
+    fun exitSelectionMode() {
+        isSelectionMode = false
+        selectedIds.clear()
+        notifyDataSetChanged()
+        onSelectionChanged(false)
+    }
+    
+    private fun toggleSelection(imageId: Long) {
+        if (selectedIds.contains(imageId)) {
+            selectedIds.remove(imageId)
+            if (selectedIds.isEmpty()) {
+                exitSelectionMode()
+            } else {
+                notifyDataSetChanged()
+            }
+        } else {
+            selectedIds.add(imageId)
+            notifyDataSetChanged()
+        }
+    }
+    
+    fun getSelectedIds(): List<Long> = selectedIds.toList()
     
     class ImageViewHolder(
         itemView: View,
-        private val onImageClick: (ImageEntity) -> Unit
+        val onImageClick: (ImageEntity) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
         private val imageView: ImageView = itemView.findViewById(R.id.imageView)
+        private val checkBox: android.widget.CheckBox = itemView.findViewById(R.id.checkBox)
+        private val selectionOverlay: View = itemView.findViewById(R.id.selectionOverlay)
         
-        fun bind(image: ImageEntity) {
+        fun bind(image: ImageEntity, isSelectionMode: Boolean, isSelected: Boolean) {
             Glide.with(itemView.context)
                 .load(File(image.filePath))
                 .centerCrop()
-                .thumbnail(0.1f) // 使用缩略图优化性能
+                .thumbnail(0.1f)
                 .into(imageView)
             
-            itemView.setOnClickListener {
-                onImageClick(image)
+            if (isSelectionMode) {
+                checkBox.visibility = View.VISIBLE
+                checkBox.isChecked = isSelected
+                selectionOverlay.visibility = if (isSelected) View.VISIBLE else View.GONE
+            } else {
+                checkBox.visibility = View.GONE
+                selectionOverlay.visibility = View.GONE
             }
         }
     }

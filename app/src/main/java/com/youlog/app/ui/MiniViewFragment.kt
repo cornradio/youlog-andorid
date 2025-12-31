@@ -43,8 +43,36 @@ class MiniViewFragment : Fragment() {
         viewModel = ViewModelProvider(owner, factory)[MainViewModel::class.java]
         
         recyclerView = view.findViewById(R.id.recyclerView)
-        adapter = MiniViewAdapter { image ->
-            openImageDetail(image)
+        val bulkActionBar = view.findViewById<android.view.View>(R.id.bulkActionBar)
+        val btnDeleteSelected = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnDeleteSelected)
+        val btnCancelSelect = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelSelect)
+        
+        adapter = MiniViewAdapter(
+            onImageClick = { image -> openImageDetail(image) },
+            onSelectionChanged = { isSelectionMode ->
+                bulkActionBar.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
+            }
+        )
+        
+        btnCancelSelect.setOnClickListener {
+            adapter.exitSelectionMode()
+        }
+        
+        btnDeleteSelected.setOnClickListener {
+            val selectedIds = adapter.getSelectedIds()
+            if (selectedIds.isNotEmpty()) {
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.delete)
+                    .setMessage("确定要删除选中的 ${selectedIds.size} 张图片吗？")
+                    .setPositiveButton(R.string.delete) { _, _ ->
+                        lifecycleScope.launch {
+                            viewModel.deleteImagesByIds(selectedIds)
+                            adapter.exitSelectionMode()
+                        }
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
+            }
         }
         
         // 使用更多的列数来实现紧凑的缩略图流

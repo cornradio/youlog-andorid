@@ -31,6 +31,7 @@ class DateFilterActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     private var startDate: Date? = null
     private var endDate: Date? = null
+    private val selectedTags = mutableSetOf<String>()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +44,13 @@ class DateFilterActivity : AppCompatActivity() {
         val database = AppDatabase.getDatabase(this)
         val repository = ImageRepository(database.imageDao())
         val factory = MainViewModelFactory(repository)
-        val owner: ViewModelStoreOwner = this
-        viewModel = ViewModelProvider(owner, factory)[MainViewModel::class.java]
+        viewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
         
+        setupUI()
+        observeData()
+    }
+    
+    private fun setupUI() {
         recyclerView = findViewById(R.id.recyclerView)
         adapter = BulkSelectAdapter { image ->
             openImageDetail(image)
@@ -54,59 +59,113 @@ class DateFilterActivity : AppCompatActivity() {
         recyclerView.layoutManager = GridLayoutManager(this, 3)
         recyclerView.adapter = adapter
         
-        // 默认显示今天的照片
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        startDate = calendar.time
+        val btnStart = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnStartDate)
+        val btnEnd = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEndDate)
         
-        calendar.add(Calendar.DAY_OF_MONTH, 1)
-        endDate = calendar.time
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         
-        loadFilteredImages()
+        btnStart.setOnClickListener {
+            showDatePicker("选择开始日期") { date ->
+                startDate = date
+                btnStart.text = sdf.format(date)
+                loadFilteredImages()
+            }
+        }
+        
+        btnEnd.setOnClickListener {
+            showDatePicker("选择结束日期") { date ->
+                endDate = date
+                btnEnd.text = sdf.format(date)
+                loadFilteredImages()
+            }
+        }
     }
     
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.date_filter_menu, menu)
-        return true
+    private fun showDatePicker(title: String, onDateSelected: (Date) -> Unit) {
+        val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker()
+            .setTitleText(title)
+            .setSelection(com.google.android.material.datepicker.MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+        
+        picker.addOnPositiveButtonClickListener { selection ->
+            onDateSelected(Date(selection))
+        }
+        picker.show(supportFragmentManager, "DatePicker")
     }
     
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
+    private fun observeData() {
+        // 获取所有标签
+        lifecycleScope.launch {
+            viewModel.allImages.collect { images ->
+                val tags = images.flatMap { it.tags?.split(",") ?: emptyList() }
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() }
+                    .distinct()
+                
+                setupTagChips(tags)
+                loadFilteredImages()
             }
-            R.id.menu_select_all -> {
-                adapter.selectAll()
-                true
+        }
+    }
+    
+    private fun setupTagChips(tags: List<String>) {
+        val chipGroup = findViewById<com.google.android.material.chip.ChipGroup>(R.id.tagFilterChipGroup)
+        chipGroup.removeAllViews()
+        
+        tags.forEach { tag ->
+            val chip = com.google.android.material.chip.Chip(this).apply {
+                text = tag
+                isCheckable = true
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) selectedTags.add(tag) else selectedTags.remove(tag)
+                    loadFilteredImages()
+                }
             }
-            R.id.menu_deselect_all -> {
-                adapter.deselectAll()
-                true
-            }
-            R.id.menu_delete_selected -> {
-                deleteSelected()
-                true
-            }
-            R.id.menu_bulk_edit_tags -> {
-                bulkEditTags()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+            chipGroup.addView(chip)
         }
     }
     
     private fun loadFilteredImages() {
-        if (startDate != null && endDate != null) {
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    viewModel.getImagesByDateRange(startDate!!, endDate!!).collect { images ->
-                        adapter.submitList(images)
+        lifecycleScope.launch {
+            viewModel.allImages.collect { allImages ->
+                val filtered = allImages.filter { image ->
+                    // 1. 日期筛选
+                    val dateMatch = when {
+                        startDate != null && endDate != null -> {
+                            val imgDate = image.dateCreated
+                            // 将 endDate 设置为当天的 23:59:59
+                            val endCal = Calendar.getInstance().apply { 
+                                time = endDate!!
+                                set(Calendar.HOUR_OF_DAY, 23)
+                                set(Calendar.MINUTE, 59)
+                                set(Calendar.SECOND, 59)
+                            }
+                            imgDate.after(startDate) && imgDate.before(endCal.time)
+                        }
+                        startDate != null -> image.dateCreated.after(startDate)
+                        endDate != null -> {
+                            val endCal = Calendar.getInstance().apply { 
+                                time = endDate!!
+                                set(Calendar.HOUR_OF_DAY, 23)
+                                set(Calendar.MINUTE, 59)
+                                set(Calendar.SECOND, 59)
+                            }
+                            image.dateCreated.before(endCal.time)
+                        }
+                        else -> true
                     }
+                    
+                    // 2. 标签筛选
+                    val tagMatch = if (selectedTags.isEmpty()) {
+                        true
+                    } else {
+                        val imgTags = image.tags?.split(",")?.map { it.trim() } ?: emptyList()
+                        selectedTags.any { it in imgTags }
+                    }
+                    
+                    dateMatch && tagMatch
                 }
+                adapter.submitList(filtered)
             }
         }
     }
