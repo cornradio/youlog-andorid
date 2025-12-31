@@ -38,14 +38,14 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val imagePath = result.data?.getStringExtra("image_path")
             if (imagePath != null) {
-                handleImageImportFromFile(File(imagePath), compress = false)
+                handleImageImportFromFile(File(imagePath), compress = true)
             }
         }
     }
     
     private val photoPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         uri?.let {
-            handleImageImport(it, compress = false, deleteOriginal = false)
+            handleImageImport(it, compress = true, deleteOriginal = false)
         }
     }
     
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity() {
         if (intent?.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
             val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
             imageUri?.let {
-                handleImageImport(it, compress = false, deleteOriginal = false)
+                handleImageImport(it, compress = true, deleteOriginal = false)
             }
         }
     }

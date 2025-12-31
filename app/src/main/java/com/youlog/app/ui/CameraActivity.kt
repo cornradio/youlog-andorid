@@ -66,7 +66,7 @@ class CameraActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // 将照片保存到应用内部存储
-                val savedFile = ImageUtils.saveImageFromUri(this@CameraActivity, photoUri!!, compress = false)
+                val savedFile = ImageUtils.saveImageFromUri(this@CameraActivity, photoUri!!, compress = true)
                 if (savedFile != null) {
                     // 删除临时文件
                     photoFile.delete()

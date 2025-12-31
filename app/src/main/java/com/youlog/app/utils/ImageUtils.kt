@@ -54,9 +54,7 @@ object ImageUtils {
                         bitmap
                     }
                     
-                    FileOutputStream(outputFile).use { out ->
-                        finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-                    }
+                    saveBitmap(finalBitmap, outputFile, 80)
                     
                     if (finalBitmap != bitmap) {
                         finalBitmap.recycle()
@@ -95,9 +93,7 @@ object ImageUtils {
                     bitmap
                 }
                 
-                FileOutputStream(outputFile).use { out ->
-                    finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-                }
+                saveBitmap(finalBitmap, outputFile, 80)
                 
                 if (finalBitmap != bitmap) {
                     finalBitmap.recycle()
@@ -140,8 +136,8 @@ object ImageUtils {
     
     private suspend fun compressBitmap(bitmap: Bitmap): Bitmap {
         return withContext(Dispatchers.IO) {
-            // 简单的压缩：如果图片太大，缩小尺寸
-            val maxSize = 1920
+            // 均衡的压缩：1280px 足够清晰，且文件体积小
+            val maxSize = 1280
             val width = bitmap.width
             val height = bitmap.height
             
@@ -153,7 +149,14 @@ object ImageUtils {
             val newWidth = (width * scale).toInt()
             val newHeight = (height * scale).toInt()
             
-            Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+            return@withContext Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        }
+    }
+
+    // 辅助方法：保存时降低质量
+    private fun saveBitmap(bitmap: Bitmap, file: File, quality: Int = 80) {
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
         }
     }
 }
