@@ -52,6 +52,12 @@
             android:name=".ui.DateFilterActivity"
             android:exported="false"
             android:theme="@style/Theme.YouLog" />
+
+        <activity
+            android:name=".ui.NoteEditActivity"
+            android:exported="false"
+            android:theme="@style/Theme.YouLog"
+            android:windowSoftInputMode="adjustResize" />
         
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -28,5 +28,8 @@
     <string name="delete_multiple_confirm">确定要删除选中的 %d 张图片吗？</string>
     <string name="compression">压缩</string>
     <string name="auto_delete_after_import">导入后删除原图</string>
+    <string name="clear">清空</string>
+    <string name="note_saved">已保存</string>
+    <string name="note_copied">笔记已复制</string>
 </resources>
 

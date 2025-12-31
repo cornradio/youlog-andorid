@@ -52,6 +52,19 @@ class ImageDetailActivity : AppCompatActivity() {
         mainViewModel = ViewModelProvider(owner, mainFactory)[MainViewModel::class.java]
         
         setupViewPager()
+        setupBottomBar()
+    }
+    
+    private fun setupBottomBar() {
+        findViewById<android.view.View>(R.id.btnNote).setOnClickListener {
+            openNoteEditor()
+        }
+        findViewById<android.view.View>(R.id.btnTag).setOnClickListener {
+            openTagEditor()
+        }
+        findViewById<android.view.View>(R.id.btnDelete).setOnClickListener {
+            confirmDelete()
+        }
     }
     
     private fun setupViewPager() {
@@ -89,6 +102,10 @@ class ImageDetailActivity : AppCompatActivity() {
     
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.image_detail_menu, menu)
+        // 既然底部有了，我们可以隐藏顶部的部分按钮，保留分享
+        menu.findItem(R.id.menu_edit_note)?.isVisible = false
+        menu.findItem(R.id.menu_edit_tags)?.isVisible = false
+        menu.findItem(R.id.menu_delete)?.isVisible = false
         return true
     }
     
@@ -98,20 +115,8 @@ class ImageDetailActivity : AppCompatActivity() {
                 finish()
                 true
             }
-            R.id.menu_edit_note -> {
-                openNoteEditor()
-                true
-            }
-            R.id.menu_edit_tags -> {
-                openTagEditor()
-                true
-            }
             R.id.menu_share -> {
                 shareImage()
-                true
-            }
-            R.id.menu_delete -> {
-                confirmDelete()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -122,8 +127,11 @@ class ImageDetailActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val image = detailViewModel.getImageById(currentImageId)
             if (image != null) {
-                NoteEditDialogFragment.newInstance(image.id, image.note ?: "")
-                    .show(supportFragmentManager, "NoteEditDialog")
+                val intent = Intent(this@ImageDetailActivity, NoteEditActivity::class.java).apply {
+                    putExtra("image_id", image.id)
+                    putExtra("initial_note", image.note ?: "")
+                }
+                startActivity(intent)
             }
         }
     }
