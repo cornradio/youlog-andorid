@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_select_all"
+        android:title="@string/select_all"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_deselect_all"
+        android:title="@string/deselect_all"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_delete_selected"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/bulk_delete"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_bulk_edit_tags"
+        android:title="批量标签"
+        app:showAsAction="never" />
+</menu>
+
