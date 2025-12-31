@@ -16,45 +16,32 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
-        <!-- 左侧图片 (占2/3宽度) -->
+        <!-- 左侧图片 (占3/5宽度) -->
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="0dp"
-            android:layout_height="200dp"
-            android:layout_weight="2"
+            android:layout_height="120dp"
+            android:layout_weight="3"
             android:scaleType="centerCrop"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="12dp"
             tools:src="@tools:sample/backgrounds/scenic" />
 
-        <!-- 右侧信息 (占1/3宽度) -->
+        <!-- 右侧信息 (占2/5宽度) -->
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
             android:orientation="vertical"
             android:gravity="top">
-
-            <!-- 笔记 -->
-            <TextView
-                android:id="@+id/noteTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:textColor="?android:textColorPrimary"
-                android:maxLines="3"
-                android:ellipsize="end"
-                android:visibility="gone"
-                tools:text="这是笔记内容..."
-                tools:visibility="visible" />
 
             <!-- 拍摄时间 -->
             <TextView
                 android:id="@+id/timeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textSize="11sp"
-                android:textColor="?android:textColorSecondary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?android:textColorPrimary"
                 tools:text="09-20 12:30" />
 
             <!-- 星期 -->
@@ -62,10 +49,34 @@
                 android:id="@+id/weekdayTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textSize="10sp"
+                android:layout_marginTop="1dp"
+                android:textSize="11sp"
                 android:textColor="?android:textColorSecondary"
                 tools:text="星期三" />
+
+            <!-- 笔记 -->
+            <TextView
+                android:id="@+id/noteTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="13sp"
+                android:textColor="?android:textColorPrimary"
+                android:maxLines="2"
+                android:ellipsize="end"
+                tools:text="这是笔记内容..." />
+
+            <!-- 标签 -->
+            <TextView
+                android:id="@+id/tagTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="11sp"
+                android:textColor="@color/teal_700"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="#旅行 #美食" />
 
         </LinearLayout>
 

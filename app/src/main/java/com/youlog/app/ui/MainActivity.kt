@@ -84,11 +84,10 @@ class MainActivity : AppCompatActivity() {
     private fun setupViewPager() {
         viewPager = findViewById(R.id.viewPager)
         val bottomNavigation = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
-        val fabAdd = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAdd)
         
         val adapter = MainPagerAdapter(this)
         viewPager.adapter = adapter
-        viewPager.isUserInputEnabled = false // 禁用滑动切换
+        viewPager.isUserInputEnabled = false 
         
         // 底部导航切换
         bottomNavigation.setOnItemSelectedListener { item ->
@@ -96,6 +95,10 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_timeline -> {
                     viewPager.currentItem = 0
                     true
+                }
+                R.id.nav_add -> {
+                    showAddImageOptions()
+                    false 
                 }
                 R.id.nav_mini_view -> {
                     viewPager.currentItem = 1
@@ -108,14 +111,14 @@ class MainActivity : AppCompatActivity() {
         // ViewPager 页面变化同步到底部导航
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                bottomNavigation.menu.getItem(position).isChecked = true
+                val itemId = when (position) {
+                    0 -> R.id.nav_timeline
+                    1 -> R.id.nav_mini_view
+                    else -> R.id.nav_timeline
+                }
+                bottomNavigation.menu.findItem(itemId).isChecked = true
             }
         })
-        
-        // FAB 点击显示选择菜单
-        fabAdd.setOnClickListener {
-            showAddImageOptions()
-        }
     }
     
     private fun showAddImageOptions() {

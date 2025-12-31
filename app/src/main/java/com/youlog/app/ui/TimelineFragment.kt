@@ -54,8 +54,7 @@ class TimelineFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allImages.collect { images ->
-                // 直接显示图片,不分组
-                adapter.submitList(images.map { TimelineItem.Image(it) })
+                adapter.submitList(images)
             }
         }
     }
@@ -65,10 +64,5 @@ class TimelineFragment : Fragment() {
         intent.putExtra("image_id", image.id)
         startActivity(intent)
     }
-}
-
-sealed class TimelineItem {
-    data class DateHeader(val date: String) : TimelineItem()
-    data class Image(val image: ImageEntity) : TimelineItem()
 }
 
