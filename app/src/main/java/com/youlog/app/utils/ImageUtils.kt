@@ -3,6 +3,8 @@ package com.youlog.app.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Environment
 import id.zelory.compressor.Compressor
@@ -33,7 +35,17 @@ object ImageUtils {
             try {
                 val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
                 inputStream?.use { stream ->
-                    val bitmap = BitmapFactory.decodeStream(stream)
+                    var bitmap = BitmapFactory.decodeStream(stream)
+                    // 处理 EXIF 旋转
+                    val orientation = getOrientation(context, uri)
+                    if (orientation != 0) {
+                        val rotated = rotateBitmap(bitmap, orientation)
+                        if (rotated != bitmap) {
+                            bitmap.recycle()
+                            bitmap = rotated
+                        }
+                    }
+                    
                     val outputFile = createImageFile(context)
                     
                     val finalBitmap = if (compress) {
@@ -46,10 +58,10 @@ object ImageUtils {
                         finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
                     }
                     
-                    bitmap.recycle()
                     if (finalBitmap != bitmap) {
                         finalBitmap.recycle()
                     }
+                    bitmap.recycle()
                     
                     return@withContext outputFile
                 }
@@ -63,7 +75,18 @@ object ImageUtils {
     suspend fun saveImageFromFile(context: Context, sourceFile: File, compress: Boolean = false): File? {
         return withContext(Dispatchers.IO) {
             try {
-                val bitmap = BitmapFactory.decodeFile(sourceFile.absolutePath)
+                val uri = Uri.fromFile(sourceFile)
+                var bitmap = BitmapFactory.decodeFile(sourceFile.absolutePath)
+                // 处理 EXIF 旋转
+                val orientation = getOrientation(context, uri)
+                if (orientation != 0) {
+                    val rotated = rotateBitmap(bitmap, orientation)
+                    if (rotated != bitmap) {
+                        bitmap.recycle()
+                        bitmap = rotated
+                    }
+                }
+                
                 val outputFile = createImageFile(context)
                 
                 val finalBitmap = if (compress) {
@@ -76,10 +99,10 @@ object ImageUtils {
                     finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
                 }
                 
-                bitmap.recycle()
                 if (finalBitmap != bitmap) {
                     finalBitmap.recycle()
                 }
+                bitmap.recycle()
                 
                 return@withContext outputFile
             } catch (e: Exception) {
@@ -87,6 +110,32 @@ object ImageUtils {
                 null
             }
         }
+    }
+
+    private fun getOrientation(context: Context, uri: Uri): Int {
+        try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val exifInterface = android.media.ExifInterface(inputStream!!)
+            val orientation = exifInterface.getAttributeInt(
+                android.media.ExifInterface.TAG_ORIENTATION,
+                android.media.ExifInterface.ORIENTATION_NORMAL
+            )
+            return when (orientation) {
+                android.media.ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                android.media.ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                android.media.ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                else -> 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return 0
+    }
+
+    private fun rotateBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
+        val matrix = android.graphics.Matrix()
+        matrix.postRotate(degrees.toFloat())
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
     
     private suspend fun compressBitmap(bitmap: Bitmap): Bitmap {
