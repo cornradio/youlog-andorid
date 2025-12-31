@@ -40,7 +40,7 @@ class TimelineAdapter(
         fun bind(image: ImageEntity) {
             Glide.with(itemView.context)
                 .load(File(image.filePath))
-                .centerCrop()
+                .fitCenter()
                 .into(imageView)
             
             // 显示笔记
