@@ -99,6 +99,7 @@ class DateFilterActivity : AppCompatActivity() {
     private fun showDatePicker(title: String, onDateSelected: (Date) -> Unit) {
         val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker()
             .setTitleText(title)
+            .setTheme(R.style.Theme_YouLog_DatePicker)
             .build()
         
         picker.addOnPositiveButtonClickListener { selection ->

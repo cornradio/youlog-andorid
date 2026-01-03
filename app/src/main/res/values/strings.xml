@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">YouLog</string>
+    <string name="app_name">图文备忘录</string>
     <string name="timeline">时间线</string>
     <string name="mini_view">迷你视图</string>
     <string name="camera">拍照</string>

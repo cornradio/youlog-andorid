@@ -70,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
         
         val database = AppDatabase.getDatabase(this)
         val repository = ImageRepository(database.imageDao(), database.tagDao())

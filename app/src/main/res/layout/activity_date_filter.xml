@@ -59,12 +59,15 @@
                         android:layout_weight="1"
                         android:text="开始日期"
                         android:textAllCaps="false"
+                        android:textColor="@color/btn_accent"
+                        app:strokeColor="@color/btn_accent"
                         app:cornerRadius="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="至"
+                        android:textColor="?android:textColorPrimary"
                         android:layout_marginHorizontal="12dp" />
 
                     <com.google.android.material.button.MaterialButton
@@ -75,6 +78,8 @@
                         android:layout_weight="1"
                         android:text="结束日期"
                         android:textAllCaps="false"
+                        android:textColor="@color/btn_accent"
+                        app:strokeColor="@color/btn_accent"
                         app:cornerRadius="8dp" />
 
                 </LinearLayout>
@@ -131,6 +136,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="应用筛选"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/btn_accent"
                 app:cornerRadius="8dp" />
 
         </LinearLayout>

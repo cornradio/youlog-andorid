@@ -23,4 +23,11 @@
     <style name="Theme.YouLog.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     
     <style name="Theme.YouLog.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Theme.YouLog.DatePicker" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">@color/btn_accent</item>
+        <item name="colorOnPrimary">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/white</item>
+    </style>
 </resources>

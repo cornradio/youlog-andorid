@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouLog - 图文备忘录 | 留住每一刻的影迹</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="logo">YouLog <span>图文备忘录</span></div>
+            <div class="nav-links">
+                <a href="#features">功能特性</a>
+                <a href="#about">关于我们</a>
+                <a href="#" class="btn-download">立即下载</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="fade-in">留住每一刻的影迹</h1>
+                <p class="fade-in">YouLog 是一款为您量身定制的轻量级图文记录工具。以时间线为轴，记录照片背后的故事，让回忆不再只是冰冷的像素。</p>
+                <div class="cta-buttons fade-in">
+                    <a href="#" class="btn btn-primary">免费获取</a>
+                    <a href="#features" class="btn btn-secondary">了解更多</a>
+                </div>
+            </div>
+            <div class="hero-image fade-in">
+                <img src="hero.png" alt="YouLog App Mockup">
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">为什么选择 YouLog？</h2>
+            <div class="feature-grid">
+                <div class="feature-card glass">
+                    <div class="icon">🕒</div>
+                    <h3>时间流转</h3>
+                    <p>自动按时间线排列您的记录，让生活轨迹一目了然。</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="icon">🏷️</div>
+                    <h3>智能标签</h3>
+                    <p>通过自定义标签快速分类和筛选，几秒内找回半年前的照片。</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="icon">📝</div>
+                    <h3>图文并茂</h3>
+                    <p>不止是照片，更是心情。每一张图都能配上您的文字备忘。</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="icon">🔒</div>
+                    <h3>隐私安全</h3>
+                    <p>数据本地存储，无需上传云端，您的秘密永远属于您。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>大道至简，实用至上</h2>
+                    <p>YouLog 拒绝臃肿的社交功能，回归记录的本质。我们相信，最好的备忘录应该是静默的、可靠的、随手可得的。</p>
+                    <ul class="check-list">
+                        <li>✅ 支持图库批量导入，一键搬家</li>
+                        <li>✅ 快速拍照记录，捕捉瞬间</li>
+                        <li>✅ 全局标签筛选，高效管理</li>
+                        <li>✅ 离线可用，响应神速</li>
+                    </ul>
+                </div>
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <span class="count">0</span>
+                        <span class="label">云端上传</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="count">100%</span>
+                        <span class="label">本地安全</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 YouLog 团队. 版权所有.</p>
+            <div class="social-links">
+                <a href="#">GitHub</a>
+                <a href="#">社区支持</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 简单的动画效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const observers = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.fade-in, .feature-card').forEach(el => {
+                observers.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
