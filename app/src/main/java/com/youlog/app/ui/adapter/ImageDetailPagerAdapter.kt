@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.github.chrisbanes.photoview.PhotoView
 import com.bumptech.glide.Glide
 import com.youlog.app.R
 import com.youlog.app.data.ImageEntity
@@ -33,13 +34,12 @@ class ImageDetailPagerAdapter(
     override fun getItemCount(): Int = images.size
     
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val imageView: ImageView = itemView.findViewById(R.id.imageView)
+        private val photoView: PhotoView = itemView.findViewById(R.id.photoView)
         
         fun bind(image: ImageEntity) {
             Glide.with(itemView.context)
                 .load(File(image.filePath))
-                .fitCenter()
-                .into(imageView)
+                .into(photoView)
         }
     }
 }
