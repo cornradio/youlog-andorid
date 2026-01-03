@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouLog - 图文备忘录 | 留住每一刻的影迹</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&family=Outfit:wght@300;600&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <nav>
         <div class="container">
             <div class="logo">YouLog <span>图文备忘录</span></div>
             <div class="nav-links">
                 <a href="#features">功能特性</a>
-                <a href="#about">关于我们</a>
-                <a href="#" class="btn-download">立即下载</a>
+                <a href="#screenshots">预览</a>
+                <a href="./youlog.apk" class="btn-download">立即下载</a>
             </div>
         </div>
     </nav>
@@ -25,15 +29,41 @@
                 <h1 class="fade-in">留住每一刻的影迹</h1>
                 <p class="fade-in">YouLog 是一款为您量身定制的轻量级图文记录工具。以时间线为轴，记录照片背后的故事，让回忆不再只是冰冷的像素。</p>
                 <div class="cta-buttons fade-in">
-                    <a href="#" class="btn btn-primary">免费获取</a>
+                    <a href="./youlog.apk" class="btn btn-primary">免费获取 APK</a>
                     <a href="#features" class="btn btn-secondary">了解更多</a>
                 </div>
             </div>
             <div class="hero-image fade-in">
-                <img src="hero.png" alt="YouLog App Mockup">
+                <img src="主页截图.png" alt="YouLog 主界面">
             </div>
         </div>
     </header>
+
+    <section id="screenshots" class="screenshots">
+        <div class="container">
+            <h2 class="section-title">界面预览</h2>
+            <div class="screenshot-grid">
+                <div class="screenshot-item glass fade-in" onclick="openModal('筛选页面截图.png')">
+                    <div class="img-wrapper">
+                        <img src="筛选页面截图.png" alt="分类筛选页">
+                    </div>
+                    <p>强大的标签与日期筛选</p>
+                </div>
+                <div class="screenshot-item glass fade-in" onclick="openModal('图片详情截图.png')">
+                    <div class="img-wrapper">
+                        <img src="图片详情截图.png" alt="图片详情页">
+                    </div>
+                    <p>沉浸式内容编辑</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for viewing images -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImg">
+    </div>
 
     <section id="features" class="features">
         <div class="container">
@@ -94,13 +124,21 @@
         <div class="container">
             <p>&copy; 2026 YouLog 团队. 版权所有.</p>
             <div class="social-links">
-                <a href="#">GitHub</a>
-                <a href="#">社区支持</a>
+                <a href="https://github.com/cornradio/youlog-andorid" target="_blank">GitHub 源码</a>
             </div>
         </div>
     </footer>
 
     <script>
+        function openModal(src) {
+            document.getElementById("imageModal").style.display = "flex";
+            document.getElementById("modalImg").src = src;
+        }
+
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+
         // 简单的动画效果
         document.addEventListener('DOMContentLoaded', () => {
             const observers = new IntersectionObserver((entries) => {
@@ -117,4 +155,5 @@
         });
     </script>
 </body>
+
 </html>

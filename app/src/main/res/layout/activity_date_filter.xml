@@ -128,7 +128,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="重置筛选" />
+                android:text="重置筛选"
+                android:textColor="@color/btn_accent" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnApplyFilter"
@@ -137,7 +138,9 @@
                 android:layout_weight="1"
                 android:text="应用筛选"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/btn_accent"
+                app:backgroundTint="@android:color/black"
+                app:strokeColor="@color/btn_accent"
+                app:strokeWidth="1dp"
                 app:cornerRadius="8dp" />
 
         </LinearLayout>
