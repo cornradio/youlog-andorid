@@ -48,9 +48,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    private val photoPickerLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let {
-            handleImageImport(it, compress = true, deleteOriginal = false)
+    private val photoPickerLauncher = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        if (uris.isNotEmpty()) {
+            showImportOptionsDialog(uris)
         }
     }
     
@@ -207,6 +207,20 @@ class MainActivity : AppCompatActivity() {
     
     private fun openPhotoLibrary() {
         photoPickerLauncher.launch(androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+
+    private fun showImportOptionsDialog(uris: List<Uri>) {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle("照片导入选项")
+            .setMessage("已选择 ${uris.size} 张照片。导入后是否删除系统图库中的原图以节省空间？")
+            .setPositiveButton("导入并删除原图") { _, _ ->
+                uris.forEach { handleImageImport(it, compress = true, deleteOriginal = true) }
+            }
+            .setNegativeButton("仅导入") { _, _ ->
+                uris.forEach { handleImageImport(it, compress = true, deleteOriginal = false) }
+            }
+            .setNeutralButton(R.string.cancel, null)
+            .show()
     }
     
     private fun handleShareIntent(intent: Intent?) {
