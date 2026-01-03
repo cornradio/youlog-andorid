@@ -34,7 +34,7 @@ class NoteEditActivity : AppCompatActivity() {
         }
 
         val database = AppDatabase.getDatabase(this)
-        val repository = ImageRepository(database.imageDao())
+        val repository = ImageRepository(database.imageDao(), database.tagDao())
         val factory = ImageDetailViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[ImageDetailViewModel::class.java]
 

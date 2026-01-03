@@ -44,7 +44,7 @@ class ImageDetailActivity : AppCompatActivity() {
         }
         
         val database = AppDatabase.getDatabase(this)
-        val repository = ImageRepository(database.imageDao())
+        val repository = ImageRepository(database.imageDao(), database.tagDao())
         val owner: ViewModelStoreOwner = this
         val detailFactory = ImageDetailViewModelFactory(repository)
         val mainFactory = MainViewModelFactory(repository)

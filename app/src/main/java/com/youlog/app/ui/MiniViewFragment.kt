@@ -37,7 +37,7 @@ class MiniViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         val database = AppDatabase.getDatabase(requireContext())
-        val repository = ImageRepository(database.imageDao())
+        val repository = ImageRepository(database.imageDao(), database.tagDao())
         val owner: ViewModelStoreOwner = requireActivity()
         val factory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(owner, factory)[MainViewModel::class.java]
@@ -80,7 +80,7 @@ class MiniViewFragment : Fragment() {
         recyclerView.adapter = adapter
         
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.allImages.collect { images ->
+            viewModel.filteredImages.collect { images ->
                 adapter.submitList(images)
             }
         }

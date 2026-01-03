@@ -2,36 +2,33 @@ package com.youlog.app.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.Lifecycle
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.youlog.app.R
 import com.youlog.app.data.AppDatabase
-import com.youlog.app.data.ImageEntity
 import com.youlog.app.repository.ImageRepository
-import com.youlog.app.ui.adapter.BulkSelectAdapter
 import com.youlog.app.ui.viewmodel.MainViewModel
 import com.youlog.app.ui.viewmodel.MainViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 
 class DateFilterActivity : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: BulkSelectAdapter
     private lateinit var viewModel: MainViewModel
+    
     private var startDate: Date? = null
     private var endDate: Date? = null
     private val selectedTags = mutableSetOf<String>()
+    
+    private lateinit var btnStart: com.google.android.material.button.MaterialButton
+    private lateinit var btnEnd: com.google.android.material.button.MaterialButton
+    private lateinit var tagChipGroup: ChipGroup
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,51 +37,68 @@ class DateFilterActivity : AppCompatActivity() {
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "筛选记录"
         
         val database = AppDatabase.getDatabase(this)
-        val repository = ImageRepository(database.imageDao())
+        val repository = ImageRepository(database.imageDao(), database.tagDao())
         val factory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
         
+        // 获取传入的当前筛选状态
+        intent.apply {
+            startDate = getLongExtra("start_date", -1).let { if (it == -1L) null else Date(it) }
+            endDate = getLongExtra("end_date", -1).let { if (it == -1L) null else Date(it) }
+            getStringArrayExtra("selected_tags")?.let { selectedTags.addAll(it) }
+        }
+        
         setupUI()
-        observeData()
+        observeTags()
     }
     
     private fun setupUI() {
-        recyclerView = findViewById(R.id.recyclerView)
-        adapter = BulkSelectAdapter { image ->
-            openImageDetail(image)
-        }
+        btnStart = findViewById(R.id.btnStartDate)
+        btnEnd = findViewById(R.id.btnEndDate)
+        tagChipGroup = findViewById(R.id.tagFilterChipGroup)
         
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
-        recyclerView.adapter = adapter
+        val sdf = java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.getDefault())
         
-        val btnStart = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnStartDate)
-        val btnEnd = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEndDate)
-        
-        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        startDate?.let { btnStart.text = sdf.format(it) }
+        endDate?.let { btnEnd.text = sdf.format(it) }
         
         btnStart.setOnClickListener {
-            showDatePicker("选择开始日期") { date ->
+            showDatePicker("选择起始时间") { date ->
                 startDate = date
                 btnStart.text = sdf.format(date)
-                loadFilteredImages()
             }
         }
         
         btnEnd.setOnClickListener {
-            showDatePicker("选择结束日期") { date ->
+            showDatePicker("选择结束时间") { date ->
                 endDate = date
                 btnEnd.text = sdf.format(date)
-                loadFilteredImages()
             }
+        }
+        
+        findViewById<View>(R.id.btnClearFilter).setOnClickListener {
+            startDate = null
+            endDate = null
+            selectedTags.clear()
+            btnStart.text = "开始日期"
+            btnEnd.text = "结束日期"
+            // 更新 ChipGroup 状态
+            for (i in 0 until tagChipGroup.childCount) {
+                (tagChipGroup.getChildAt(i) as? Chip)?.isChecked = false
+            }
+        }
+        
+        findViewById<View>(R.id.btnApplyFilter).setOnClickListener {
+            applyAndFinish()
         }
     }
     
     private fun showDatePicker(title: String, onDateSelected: (Date) -> Unit) {
         val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker()
             .setTitleText(title)
-            .setSelection(com.google.android.material.datepicker.MaterialDatePicker.todayInUtcMilliseconds())
             .build()
         
         picker.addOnPositiveButtonClickListener { selection ->
@@ -93,119 +107,41 @@ class DateFilterActivity : AppCompatActivity() {
         picker.show(supportFragmentManager, "DatePicker")
     }
     
-    private fun observeData() {
-        // 获取所有标签
+    private fun observeTags() {
         lifecycleScope.launch {
-            viewModel.allImages.collect { images ->
-                val tags = images.flatMap { it.tags?.split(",") ?: emptyList() }
-                    .map { it.trim() }
-                    .filter { it.isNotBlank() }
-                    .distinct()
-                
-                setupTagChips(tags)
-                loadFilteredImages()
-            }
-        }
-    }
-    
-    private fun setupTagChips(tags: List<String>) {
-        val chipGroup = findViewById<com.google.android.material.chip.ChipGroup>(R.id.tagFilterChipGroup)
-        chipGroup.removeAllViews()
-        
-        tags.forEach { tag ->
-            val chip = com.google.android.material.chip.Chip(this).apply {
-                text = tag
-                isCheckable = true
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) selectedTags.add(tag) else selectedTags.remove(tag)
-                    loadFilteredImages()
-                }
-            }
-            chipGroup.addView(chip)
-        }
-    }
-    
-    private fun loadFilteredImages() {
-        lifecycleScope.launch {
-            viewModel.allImages.collect { allImages ->
-                val filtered = allImages.filter { image ->
-                    // 1. 日期筛选
-                    val dateMatch = when {
-                        startDate != null && endDate != null -> {
-                            val imgDate = image.dateCreated
-                            // 将 endDate 设置为当天的 23:59:59
-                            val endCal = Calendar.getInstance().apply { 
-                                time = endDate!!
-                                set(Calendar.HOUR_OF_DAY, 23)
-                                set(Calendar.MINUTE, 59)
-                                set(Calendar.SECOND, 59)
-                            }
-                            imgDate.after(startDate) && imgDate.before(endCal.time)
+            viewModel.allTags.collectLatest { tags ->
+                tagChipGroup.removeAllViews()
+                tags.forEach { tagEntity ->
+                    val chip = Chip(this@DateFilterActivity).apply {
+                        text = tagEntity.name
+                        isCheckable = true
+                        isChecked = selectedTags.contains(tagEntity.name)
+                        setOnCheckedChangeListener { _, isChecked ->
+                            if (isChecked) selectedTags.add(tagEntity.name) else selectedTags.remove(tagEntity.name)
                         }
-                        startDate != null -> image.dateCreated.after(startDate)
-                        endDate != null -> {
-                            val endCal = Calendar.getInstance().apply { 
-                                time = endDate!!
-                                set(Calendar.HOUR_OF_DAY, 23)
-                                set(Calendar.MINUTE, 59)
-                                set(Calendar.SECOND, 59)
-                            }
-                            image.dateCreated.before(endCal.time)
-                        }
-                        else -> true
                     }
-                    
-                    // 2. 标签筛选
-                    val tagMatch = if (selectedTags.isEmpty()) {
-                        true
-                    } else {
-                        val imgTags = image.tags?.split(",")?.map { it.trim() } ?: emptyList()
-                        selectedTags.any { it in imgTags }
-                    }
-                    
-                    dateMatch && tagMatch
-                }
-                adapter.submitList(filtered)
-            }
-        }
-    }
-    
-    private fun openImageDetail(image: ImageEntity) {
-        val intent = Intent(this, ImageDetailActivity::class.java)
-        intent.putExtra("image_id", image.id)
-        startActivity(intent)
-    }
-    
-    private fun deleteSelected() {
-        val selectedIds = adapter.getSelectedIds()
-        if (selectedIds.isEmpty()) {
-            Toast.makeText(this, "请先选择要删除的图片", Toast.LENGTH_SHORT).show()
-            return
-        }
-        
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.delete)
-            .setMessage(getString(R.string.delete_multiple_confirm, selectedIds.size))
-            .setPositiveButton(R.string.delete) { _, _ ->
-                lifecycleScope.launch {
-                    viewModel.deleteImagesByIds(selectedIds)
-                    adapter.clearSelection()
-                    Toast.makeText(this@DateFilterActivity, "已删除 ${selectedIds.size} 张图片", Toast.LENGTH_SHORT).show()
+                    tagChipGroup.addView(chip)
                 }
             }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
+        }
     }
     
-    private fun bulkEditTags() {
-        val selectedIds = adapter.getSelectedIds()
-        if (selectedIds.isEmpty()) {
-            Toast.makeText(this, "请先选择要编辑的图片", Toast.LENGTH_SHORT).show()
-            return
+    private fun applyAndFinish() {
+        val resultIntent = Intent().apply {
+            putExtra("start_date", startDate?.time ?: -1L)
+            putExtra("end_date", endDate?.time ?: -1L)
+            putExtra("selected_tags", selectedTags.toTypedArray())
         }
-        
-        // TODO: 实现批量标签编辑对话框
-        Toast.makeText(this, "批量标签编辑功能开发中", Toast.LENGTH_SHORT).show()
+        setResult(RESULT_OK, resultIntent)
+        finish()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
 

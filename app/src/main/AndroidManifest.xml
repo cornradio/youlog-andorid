@@ -58,6 +58,8 @@
             android:exported="false"
             android:theme="@style/Theme.YouLog"
             android:windowSoftInputMode="adjustResize" />
+
+
         
         <provider
             android:name="androidx.core.content.FileProvider"

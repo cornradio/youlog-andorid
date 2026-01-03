@@ -42,7 +42,7 @@ class NoteEditDialogFragment : DialogFragment() {
         imageId = arguments?.getLong("image_id") ?: -1
         
         val database = AppDatabase.getDatabase(requireContext())
-        val repository = ImageRepository(database.imageDao())
+        val repository = ImageRepository(database.imageDao(), database.tagDao())
         val owner: ViewModelStoreOwner = requireActivity()
         val factory = ImageDetailViewModelFactory(repository)
         viewModel = ViewModelProvider(owner, factory)[ImageDetailViewModel::class.java]

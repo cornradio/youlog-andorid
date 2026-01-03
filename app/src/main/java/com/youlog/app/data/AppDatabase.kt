@@ -7,10 +7,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import java.util.Date
 
-@Database(entities = [ImageEntity::class], version = 1, exportSchema = false)
+@Database(entities = [ImageEntity::class, TagEntity::class], version = 2, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun imageDao(): ImageDao
+    abstract fun tagDao(): TagDao
     
     companion object {
         @Volatile
@@ -22,7 +23,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "youlog_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

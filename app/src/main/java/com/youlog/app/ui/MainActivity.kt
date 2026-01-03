@@ -36,6 +36,7 @@ import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
+    private lateinit var filterLauncher: androidx.activity.result.ActivityResultLauncher<Intent>
     private lateinit var viewPager: ViewPager2
     
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -71,11 +72,12 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         
         val database = AppDatabase.getDatabase(this)
-        val repository = ImageRepository(database.imageDao())
+        val repository = ImageRepository(database.imageDao(), database.tagDao())
         val owner: ViewModelStoreOwner = this
         val factory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(owner, factory)[MainViewModel::class.java]
         
+        setupFilterLauncher()
         setupViewPager()
         setupEmptyState()
         handleShareIntent(intent)
@@ -162,11 +164,28 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_filter -> {
-                val intent = Intent(this, DateFilterActivity::class.java)
-                startActivity(intent)
+                val intent = Intent(this, DateFilterActivity::class.java).apply {
+                    putExtra("start_date", viewModel.startDate.value?.time ?: -1L)
+                    putExtra("end_date", viewModel.endDate.value?.time ?: -1L)
+                    putExtra("selected_tags", viewModel.selectedTags.value.toTypedArray())
+                }
+                filterLauncher.launch(intent)
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    private fun setupFilterLauncher() {
+        filterLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val start = data?.getLongExtra("start_date", -1L)?.let { if (it == -1L) null else java.util.Date(it) }
+                val end = data?.getLongExtra("end_date", -1L)?.let { if (it == -1L) null else java.util.Date(it) }
+                val tags = data?.getStringArrayExtra("selected_tags")?.toSet() ?: emptySet()
+                
+                viewModel.setFilters(tags, start, end)
+            }
         }
     }
     
@@ -192,7 +211,12 @@ class MainActivity : AppCompatActivity() {
     
     private fun handleShareIntent(intent: Intent?) {
         if (intent?.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
-            val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+            val imageUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+            }
             imageUri?.let {
                 handleImageImport(it, compress = true, deleteOriginal = false)
             }

@@ -16,12 +16,30 @@ class ImageDetailViewModel(private val repository: ImageRepository) : ViewModel(
     private val _allImages = MutableStateFlow<List<ImageEntity>>(emptyList())
     val allImages: StateFlow<List<ImageEntity>> = _allImages
     
+    val allTags = repository.getAllTags()
+    
     init {
         viewModelScope.launch {
             repository.getAllImages().collect { images ->
                 _allImages.value = images
             }
         }
+    }
+
+    fun addTag(name: String) = viewModelScope.launch {
+        repository.addTag(name)
+    }
+
+    fun deleteTag(tag: com.youlog.app.data.TagEntity) = viewModelScope.launch {
+        repository.deleteTag(tag)
+    }
+
+    fun incrementTagUsage(name: String) = viewModelScope.launch {
+        repository.incrementTagUsage(name)
+    }
+
+    fun decrementTagUsage(name: String) = viewModelScope.launch {
+        repository.decrementTagUsage(name)
     }
     
     suspend fun getImageById(id: Long): ImageEntity? = repository.getImageById(id)
