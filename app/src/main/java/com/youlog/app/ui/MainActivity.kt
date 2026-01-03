@@ -24,9 +24,13 @@ import com.youlog.app.ui.adapter.MainPagerAdapter
 import com.youlog.app.ui.viewmodel.MainViewModel
 import com.youlog.app.ui.viewmodel.MainViewModelFactory
 import com.youlog.app.utils.ImageUtils
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import android.view.View
+import android.widget.LinearLayout
 import java.io.File
 import java.util.Date
 
@@ -73,7 +77,23 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(owner, factory)[MainViewModel::class.java]
         
         setupViewPager()
+        setupEmptyState()
         handleShareIntent(intent)
+    }
+
+    private fun setupEmptyState() {
+        val emptyStateLayout = findViewById<LinearLayout>(R.id.emptyStateLayout)
+        lifecycleScope.launch {
+            viewModel.allImages.collectLatest { images ->
+                if (images.isEmpty()) {
+                    emptyStateLayout.visibility = View.VISIBLE
+                    viewPager.visibility = View.GONE
+                } else {
+                    emptyStateLayout.visibility = View.GONE
+                    viewPager.visibility = View.VISIBLE
+                }
+            }
+        }
     }
     
     override fun onNewIntent(intent: Intent) {

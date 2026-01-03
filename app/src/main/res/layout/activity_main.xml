@@ -26,6 +26,35 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
+    <LinearLayout
+        android:id="@+id/emptyStateLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:src="@drawable/img_empty_state"
+            android:scaleType="centerInside" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:text="@string/empty_guide"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:textColor="?attr/colorOnSurface"
+            android:alpha="0.6"
+            android:gravity="center" />
+
+    </LinearLayout>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
