@@ -35,49 +35,50 @@
             android:orientation="vertical"
             android:gravity="top">
 
-            <!-- 拍摄时间 -->
+            <!-- 拍摄时间 (增大字号) -->
             <TextView
                 android:id="@+id/timeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:textSize="19sp"
                 android:textStyle="bold"
                 android:textColor="?android:textColorPrimary"
-                tools:text="09-20 12:30" />
+                tools:text="01/03 22:10" />
 
-            <!-- 星期 -->
+            <!-- 星期 (略微增大) -->
             <TextView
                 android:id="@+id/weekdayTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
-                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                android:textSize="16sp"
                 android:textColor="?android:textColorSecondary"
                 tools:text="星期三" />
 
-            <!-- 笔记 -->
+            <!-- 笔记 (增大字号) -->
             <TextView
                 android:id="@+id/noteTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textSize="13sp"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
                 android:textColor="?android:textColorPrimary"
-                android:maxLines="2"
+                android:maxLines="3"
+                android:lineSpacingExtra="2dp"
                 android:ellipsize="end"
-                tools:text="这是笔记内容..." />
+                tools:text="这是笔记内容，现在字号更大了，更容易阅读..." />
 
-            <!-- 标签 -->
+            <!-- 标签 (略微增大) -->
             <TextView
                 android:id="@+id/tagTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textSize="11sp"
+                android:layout_marginTop="10dp"
+                android:textSize="14sp"
                 android:textColor="@color/teal_700"
                 android:maxLines="1"
                 android:ellipsize="end"
-                tools:text="#旅行 #美食" />
+                tools:text="#旅行 #美食 #生活" />
 
         </LinearLayout>
 

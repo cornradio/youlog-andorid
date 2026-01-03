@@ -27,7 +27,7 @@
         android:layout_height="0dp"
         android:background="@android:color/transparent"
         android:gravity="top"
-        android:hint="输入笔记..."
+        android:hint="点击这里，输入笔记..."
         android:importantForAutofill="no"
         android:inputType="textMultiLine"
         android:padding="20dp"

@@ -62,8 +62,8 @@ class TimelineAdapter(
                 tagTextView.visibility = View.GONE
             }
             
-            // 显示拍摄时间 (格式: 09-20 12:30)
-            val dateFormat = java.text.SimpleDateFormat("MM-dd HH:mm", java.util.Locale.getDefault())
+            // 显示拍摄时间 (格式: 01/03 22:10)
+            val dateFormat = java.text.SimpleDateFormat("MM/dd HH:mm", java.util.Locale.getDefault())
             timeTextView.text = dateFormat.format(image.dateCreated)
             
             // 显示星期
